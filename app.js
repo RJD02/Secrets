@@ -3,6 +3,9 @@ const app = express();
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 const encrypt = require("mongoose-encryption");
+const morgan = require("morgan");
+
+app.use(morgan("dev"));
 
 mongoose
   .connect("mongodb://localhost:27017/userDB")
@@ -47,7 +50,7 @@ app.post("/login", async (req, res) => {
   const user = await User.findOne({
     email: req.body.username,
   });
-  if (user.password === req.body.password) {
+  if (user && user.password === req.body.password) {
     console.log(user.password);
     res.render("secrets");
   } else {
