@@ -5,6 +5,8 @@ const ejs = require("ejs");
 const mongoose = require("mongoose");
 const encrypt = require("mongoose-encryption");
 const morgan = require("morgan");
+const md5 = require("md5");
+const bcrypt = require("bcrypt");
 
 app.use(morgan("dev"));
 
@@ -33,9 +35,9 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const secret = process.env.MONGOOSE_ENCRYPTION_SECRET;
+// const secret = process.env.MONGOOSE_ENCRYPTION_SECRET;
 
-userSchema.plugin(encrypt, { secret, encryptedFields: ["password"] });
+// userSchema.plugin(encrypt, { secret, encryptedFields: ["password"] });
 
 const User = mongoose.model("User", userSchema);
 
@@ -65,17 +67,24 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const newUser = new User({
-    email: req.body.username,
-    password: req.body.password,
+  bcrypt.hash(req.body.password, process.env.SALT_ROUNDS, (err, hash) => {
+    const newUser = new User({
+      email: req.body.username,
+      password: hash,
+    });
+
+    newUser.save((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.render("secrets");
+      }
+    });
   });
-  newUser.save((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("secrets");
-    }
-  });
+});
+
+app.get("/logout", (req, res) => {
+  res.redirect("/");
 });
 
 app.listen(3000, () => {
