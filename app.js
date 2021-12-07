@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const ejs = require("ejs");
@@ -21,7 +22,7 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -32,7 +33,7 @@ const userSchema = mongoose.Schema({
   },
 });
 
-const secret = "IamRaviraj.";
+const secret = process.env.MONGOOSE_ENCRYPTION_SECRET;
 
 userSchema.plugin(encrypt, { secret, encryptedFields: ["password"] });
 
